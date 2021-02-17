@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  jjmedia5:
+    image: ${DOCKER_REGISTRY-}jjmedia5
+    build:
+      context: .
+      dockerfile: JJMedia5/Dockerfile
