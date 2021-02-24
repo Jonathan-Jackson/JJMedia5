@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using JJMedia5.Core.Entities;
+using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -11,14 +12,14 @@ namespace JJMedia5.MediaSubscription.Controllers {
 
         // GET: api/<RssController>
         [HttpGet]
-        public IEnumerable<object> Get() {
-            return new[] { new { id = 0, title = "placeholder" } };
+        public IEnumerable<RssFeed> Get() {
+            return new[] { new RssFeed { Id = 0, Info = "PLACEHOLDER" } };
         }
 
         // GET api/<RssController>/5
         [HttpGet("{id}")]
-        public object Get(int id) {
-            return new { id, title = "placeholder" };
+        public RssFeed Get(int id) {
+            return new RssFeed { Id = id, Info = "PLACEHOLDER" };
         }
 
         // POST api/<RssController>
