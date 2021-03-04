@@ -1,5 +1,4 @@
 using Elastic.Apm.NetCoreAll;
-using Elastic.Apm.SqlClient;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 

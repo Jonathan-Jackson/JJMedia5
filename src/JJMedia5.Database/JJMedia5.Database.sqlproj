@@ -60,4 +60,7 @@
   <ItemGroup>
     <Build Include="RssFeeds.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <RefactorLog Include="JJMedia5.Database.refactorlog" />
+  </ItemGroup>
 </Project>

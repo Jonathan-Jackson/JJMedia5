@@ -1,7 +1,9 @@
-﻿using System;
+﻿using JJMedia5.Core.Attributes;
+using System;
 
 namespace JJMedia5.Core.Entities {
 
+    [Repository(TableName = "RssFeeds")]
     public class RssFeed : Entity {
         public string Url { get; set; }
 
@@ -9,6 +11,17 @@ namespace JJMedia5.Core.Entities {
 
         public bool IsSubscribed { get; set; }
 
-        public DateTimeOffset CreatedOn { get; } = DateTime.UtcNow;
+        public DateTimeOffset? StartDate { get; set; }
+
+        public DateTimeOffset CreatedDate { get; } = DateTime.UtcNow;
+
+        public override object GetPropertyModel()
+            => new {
+                Url,
+                Info,
+                IsSubscribed,
+                StartDate,
+                CreatedDate
+            };
     }
 }

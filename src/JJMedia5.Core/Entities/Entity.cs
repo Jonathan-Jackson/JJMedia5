@@ -5,5 +5,7 @@
 
         public string GetCacheKey()
             => $"{GetType().Name}_{Id}";
+
+        public abstract object GetPropertyModel();
     }
 }

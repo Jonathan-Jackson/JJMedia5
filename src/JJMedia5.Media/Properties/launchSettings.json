@@ -20,7 +20,7 @@
     "JJMedia5": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "rss",
+      "launchUrl": "api/rss",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

@@ -1,8 +1,9 @@
-﻿CREATE TABLE [dbo].[Table1]
+﻿CREATE TABLE [dbo].[RssFeeds]
 (
-	[Id] INT NOT NULL PRIMARY KEY, 
-    [Url] NCHAR(500) NOT NULL, 
-    [Info] NCHAR(1000) NOT NULL, 
+	[Id] INT NOT NULL IDENTITY(1,1) PRIMARY KEY, 
+    [Url] NVARCHAR(500) NOT NULL, 
+    [Info] NVARCHAR(1000) NOT NULL, 
     [IsSubscribed] BIT NOT NULL, 
-    [CreatedOn] DATETIMEOFFSET NOT NULL
+    [CreatedDate] DATETIMEOFFSET NOT NULL, 
+    [StartDate] DATETIMEOFFSET NOT NULL 
 )
