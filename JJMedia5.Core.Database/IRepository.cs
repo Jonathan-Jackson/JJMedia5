@@ -1,7 +1,7 @@
 ﻿using JJMedia5.Core.Entities;
-using SqlKata.Execution;
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace JJMedia5.Core.Database {
@@ -15,6 +15,18 @@ namespace JJMedia5.Core.Database {
         Task<TEntity> FindAsync(int id);
 
         Task<ICollection<TEntity>> GetAsync(int limit = 10);
+
+        Task<ICollection<TEntity>> WhereAsync(Expression<Func<TEntity, object>> expression, object value, int limit = 10);
+
+        // Is there a better way to do this with expressions? Just take the lazy route for now since the outcome is the same,
+        // and with generics we only have to write this once - more complex queries will need overrides anyway.
+        Task<ICollection<TEntity>> WhereGreaterThanAsync(Expression<Func<TEntity, object>> expression, object value, int limit = 10);
+
+        Task<ICollection<TEntity>> WhereLessThanAsync(Expression<Func<TEntity, object>> expression, object value, int limit = 10);
+
+        Task<ICollection<TEntity>> WhereNotAsync(Expression<Func<TEntity, object>> expression, object value, int limit = 10);
+
+        //--
 
         Task<int> UpdateAsync(TEntity item);
     }
