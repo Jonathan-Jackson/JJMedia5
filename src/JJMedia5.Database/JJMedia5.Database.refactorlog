@@ -7,4 +7,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="CreatedDate" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="ba30e580-c0cb-4d55-b340-57e2fe3cb93c" ChangeDateTime="03/05/2021 23:26:30">
+    <Property Name="ElementName" Value="[dbo].[RssFeeds].[RootPath]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[RssFeeds]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="LinkXPath" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="a2adb4b7-8f77-4f41-9da6-50ae606cf6f4" ChangeDateTime="03/05/2021 23:27:18">
+    <Property Name="ElementName" Value="[dbo].[RssFeeds].[LinkXPath]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[RssFeeds]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="XmlXPathLink" />
+  </Operation>
 </Operations>

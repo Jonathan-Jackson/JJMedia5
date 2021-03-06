@@ -16,6 +16,8 @@ namespace JJMedia5.Core.Database {
 
         Task<ICollection<TEntity>> GetAsync(int limit = 10);
 
+        Task<int> UpdateAsync(TEntity item);
+
         Task<ICollection<TEntity>> WhereAsync(Expression<Func<TEntity, object>> expression, object value, int limit = 10);
 
         // Is there a better way to do this with expressions? Just take the lazy route for now since the outcome is the same,
@@ -27,7 +29,5 @@ namespace JJMedia5.Core.Database {
         Task<ICollection<TEntity>> WhereNotAsync(Expression<Func<TEntity, object>> expression, object value, int limit = 10);
 
         //--
-
-        Task<int> UpdateAsync(TEntity item);
     }
 }

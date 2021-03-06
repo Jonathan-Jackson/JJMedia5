@@ -18,8 +18,4 @@
     <ProjectReference Include="..\..\JJMedia5.Core.Database\JJMedia5.Core.Database.csproj" />
     <ProjectReference Include="..\JJMedia5.Core\JJMedia5.Core.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Repository\" />
-  </ItemGroup>
 </Project>

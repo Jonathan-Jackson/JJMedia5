@@ -15,13 +15,19 @@ namespace JJMedia5.Core.Entities {
 
         public DateTimeOffset CreatedDate { get; } = DateTime.UtcNow;
 
+        public string XmlXPathLink { get; set; } = string.Empty;
+
+        public string RegexMatch { get; set; } = string.Empty;
+
         public override object GetPropertyModel()
             => new {
                 Url,
                 Info,
                 IsSubscribed,
                 StartDate,
-                CreatedDate
+                CreatedDate,
+                XmlXPathLink,
+                RegexMatch
             };
     }
 }
