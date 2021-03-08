@@ -59,6 +59,7 @@
   </ItemGroup>
   <ItemGroup>
     <Build Include="RssFeeds.sql" />
+    <Build Include="RssDownload.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="JJMedia5.Database.refactorlog" />

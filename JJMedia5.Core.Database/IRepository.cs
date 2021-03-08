@@ -24,6 +24,8 @@ namespace JJMedia5.Core.Database {
         // and with generics we only have to write this once - more complex queries will need overrides anyway.
         Task<ICollection<TEntity>> WhereGreaterThanAsync(Expression<Func<TEntity, object>> expression, object value, int limit = 10);
 
+        Task<ICollection<TEntity>> WhereInAsync(Expression<Func<TEntity, object>> expression, IEnumerable<object> values, int limit = 100);
+
         Task<ICollection<TEntity>> WhereLessThanAsync(Expression<Func<TEntity, object>> expression, object value, int limit = 10);
 
         Task<ICollection<TEntity>> WhereNotAsync(Expression<Func<TEntity, object>> expression, object value, int limit = 10);

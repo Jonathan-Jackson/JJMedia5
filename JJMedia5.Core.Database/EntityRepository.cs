@@ -23,7 +23,7 @@ namespace JJMedia5.Core.Database {
 
         public Task<int> AddAsync(TEntity entity) {
             return ExecAsync(db => db.Query(_tableName)
-                .InsertAsync(entity.GetPropertyModel()));
+                .InsertGetIdAsync<int>(entity.GetPropertyModel()));
         }
 
         public virtual Task<int> DeleteAsync(int id) {
@@ -72,15 +72,34 @@ namespace JJMedia5.Core.Database {
             }
         }
 
+        public Task<ICollection<TEntity>> WhereInAsync(Expression<Func<TEntity, object>> expression, IEnumerable<object> values, int limit = 100) {
+            var name = GetMemberName(expression);
+
+            return ExecAsync<ICollection<TEntity>>(async db => (await db.Query(_tableName)
+                                                          .WhereIn(name, values)
+                                                          .Limit(limit)
+                                                          .GetAsync<TEntity>())
+                                                          .ToArray());
+        }
+
         private Task<ICollection<TEntity>> WhereAsync(Expression<Func<TEntity, object>> expression, object value, string @operator, int limit = 10) {
-            var op = ((UnaryExpression)expression.Body).Operand;
-            var name = ((MemberExpression)op).Member.Name;
+            var name = GetMemberName(expression);
 
             return ExecAsync<ICollection<TEntity>>(async db => (await db.Query(_tableName)
                                                           .Where(name, @operator, value)
                                                           .Limit(limit)
                                                           .GetAsync<TEntity>())
                                                           .ToArray());
+        }
+
+        private string GetMemberName(Expression<Func<TEntity, object>> expression) {
+            if (expression.Body is MemberExpression body) {
+                return body.Member.Name;
+            }
+            else {
+                var op = ((UnaryExpression)expression.Body).Operand;
+                return ((MemberExpression)op).Member.Name;
+            }
         }
     }
 }

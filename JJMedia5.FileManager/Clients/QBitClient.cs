@@ -12,6 +12,14 @@ namespace JJMedia5.FileManager.Clients {
         private readonly string _password;
         private readonly HttpClient _client;
 
+        // hold the previous ssid we got,
+        // as QBittorrent won't send a new one
+        // if we're already authenticated.
+        // We still request on every request,
+        // because we want to make sure QBit hasn't closed
+        // and cleared out our authentication.
+        private string _lastSsid;
+
         public QBitClient(HttpClient client, string address, string userName, string password) {
             _client = client;
             _userName = userName;
@@ -30,8 +38,10 @@ namespace JJMedia5.FileManager.Clients {
                 if (!response.IsSuccessStatusCode)
                     throw new HttpRequestException($"Failed to authenticate to QBittorrent: {response.ReasonPhrase}");
 
-                return response.Headers.FirstOrDefault(x => string.Equals(x.Key, "Set-Cookie", StringComparison.OrdinalIgnoreCase)).Value.FirstOrDefault()
-                    ?? throw new HttpRequestException("Did not recieve a Set-Cookie header from QBittorent for Authentication.");
+                _lastSsid = response.Headers.FirstOrDefault(x => string.Equals(x.Key, "Set-Cookie", StringComparison.OrdinalIgnoreCase)).Value?.FirstOrDefault()
+                    ?? _lastSsid;
+
+                return _lastSsid ?? throw new HttpRequestException($"Could not authenticate with QBit on {_address}");
             }
         }
 

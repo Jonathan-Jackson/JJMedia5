@@ -10,24 +10,39 @@ using System.Xml;
 namespace JJMedia5.FileManager.Services {
 
     public class RssService {
-        private readonly IRepository<RssFeed> _repo;
+        private readonly IRepository<RssFeed> _rssFeedRepo;
+        private readonly IRepository<RssDownload> _rssDownloadRepo;
         private readonly HttpClient _client;
 
-        public RssService(IRepository<RssFeed> repo, HttpClient client) {
-            _repo = repo;
+        public RssService(IRepository<RssFeed> rssFeedRepo, IRepository<RssDownload> rssDownloadRepo, HttpClient client) {
+            _rssFeedRepo = rssFeedRepo;
+            _rssDownloadRepo = rssDownloadRepo;
             _client = client;
         }
 
-        public async Task<IReadOnlyCollection<string>> GetHashesFromFeeds() {
-            var feeds = await _repo.WhereLessThanAsync(r => r.StartDate, DateTimeOffset.UtcNow, 1000);
+        public async Task AddHashDownloads(IEnumerable<RssDownload> downloads) {
+            // add bulk support for this to improve optimization.
+            foreach (var download in downloads)
+                await _rssDownloadRepo.AddAsync(download);
+        }
+
+        public async Task<IReadOnlyCollection<RssDownload>> GetNewHashesFromFeeds() {
+            var feeds = await _rssFeedRepo.WhereLessThanAsync(r => r.StartDate, DateTimeOffset.UtcNow, 1000);
 
             // yes wait on each one, we don't want to ddos the endpoints.
-            var hashes = new List<string>();
+            var downloads = new List<RssDownload>();
             foreach (var feed in feeds) {
-                hashes.AddRange(await ProcessFeed(feed));
+                var hashes = await ProcessFeed(feed);
+                downloads.AddRange(hashes.Select(h => new RssDownload {
+                    Hash = h,
+                    RssFeedId = feed.Id
+                }));
             }
 
-            return hashes;
+            // remove any already downloaded.
+            var dups = await _rssDownloadRepo.WhereInAsync(r => r.Hash, downloads.Select(d => d.Hash), limit: downloads.Count);
+            var dupHashes = dups.Select(d => d.Hash).ToHashSet();
+            return downloads.Where(d => !dupHashes.Contains(d.Hash)).ToArray();
         }
 
         public async Task<IReadOnlyCollection<string>> ProcessFeed(RssFeed feed) {
@@ -36,7 +51,10 @@ namespace JJMedia5.FileManager.Services {
 
             // TODO: Add logic to handle the XML based on it's origin.
             // for now, we just assume it's nyaa
-            return GetHashesFromNyaaXML(xml, feed).ToArray();
+            if (feed.Url.Contains("subsplease.org", StringComparison.OrdinalIgnoreCase)) {
+                return GetHashesFromSubsPleaseXML(xml, feed).ToArray();
+            }
+            else return GetHashesFromNyaaXML(xml, feed).ToArray();
         }
 
         private async Task<string> GetXmlFromFeed(RssFeed feed) {
@@ -44,6 +62,23 @@ namespace JJMedia5.FileManager.Services {
             if (!res.IsSuccessStatusCode) throw new HttpRequestException("Failed to get return XML from feed."); // what do we do here..?
 
             return await res.Content.ReadAsStringAsync();
+        }
+
+        private IEnumerable<string> GetHashesFromSubsPleaseXML(string xml, RssFeed feed) {
+            var doc = new XmlDocument();
+            doc.LoadXml(xml);
+
+            XmlNamespaceManager nsmgr = new XmlNamespaceManager(doc.NameTable);
+            foreach (XmlNode node in doc.DocumentElement.SelectNodes("//item", nsmgr)) {
+                var pubDate = node["pubDate"];
+
+                // If the date is valid AND is past the pub date, lets go.
+                if (DateTimeOffset.TryParse(pubDate.InnerText, out DateTimeOffset date)
+                    && date > feed.StartDate) {
+                    var hashNode = node["link"];
+                    yield return hashNode.InnerText;
+                }
+            }
         }
 
         private IEnumerable<string> GetHashesFromNyaaXML(string xml, RssFeed feed) {
