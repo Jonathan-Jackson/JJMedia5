@@ -18,19 +18,25 @@ namespace JJMedia5.FileManager.Services {
             _client = client;
         }
 
-        public async Task PollFeeds() {
+        public async Task<IReadOnlyCollection<string>> GetHashesFromFeeds() {
             var feeds = await _repo.WhereLessThanAsync(r => r.StartDate, DateTimeOffset.UtcNow, 1000);
 
-            foreach (var feed in feeds)
-                await ProcessFeed(feed); // yes wait on each one, we don't want to ddos the endpoints.
+            // yes wait on each one, we don't want to ddos the endpoints.
+            var hashes = new List<string>();
+            foreach (var feed in feeds) {
+                hashes.AddRange(await ProcessFeed(feed));
+            }
+
+            return hashes;
         }
 
-        public async Task ProcessFeed(RssFeed feed) {
+        public async Task<IReadOnlyCollection<string>> ProcessFeed(RssFeed feed) {
             // Find what we should download.
             var xml = await GetXmlFromFeed(feed);
-            var hashes = GetHashesFromXML(xml, feed).ToArray();
 
-            // magnet / hashes - send to torrent client.
+            // TODO: Add logic to handle the XML based on it's origin.
+            // for now, we just assume it's nyaa
+            return GetHashesFromNyaaXML(xml, feed).ToArray();
         }
 
         private async Task<string> GetXmlFromFeed(RssFeed feed) {
@@ -40,16 +46,21 @@ namespace JJMedia5.FileManager.Services {
             return await res.Content.ReadAsStringAsync();
         }
 
-        private IEnumerable<string> GetHashesFromXML(string xml, RssFeed feed) {
+        private IEnumerable<string> GetHashesFromNyaaXML(string xml, RssFeed feed) {
             var doc = new XmlDocument();
             doc.LoadXml(xml);
 
             XmlNamespaceManager nsmgr = new XmlNamespaceManager(doc.NameTable);
-            string xPathString = feed.XmlXPathLink;
-            var nodes = doc.DocumentElement.SelectNodes(xPathString, nsmgr);
+            foreach (XmlNode node in doc.DocumentElement.SelectNodes("//item", nsmgr)) {
+                var pubDate = node["pubDate"];
 
-            foreach (XmlNode node in nodes)
-                yield return node.InnerText;
+                // If the date is valid AND is past the pub date, lets go.
+                if (DateTimeOffset.TryParse(pubDate.InnerText, out DateTimeOffset date)
+                    && date > feed.StartDate) {
+                    var hashNode = node["nyaa:infoHash"];
+                    yield return hashNode.InnerText;
+                }
+            }
         }
     }
 }

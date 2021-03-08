@@ -6,6 +6,5 @@
     [IsSubscribed] BIT NOT NULL, 
     [CreatedDate] DATETIMEOFFSET NOT NULL, 
     [StartDate] DATETIMEOFFSET NOT NULL, 
-    [XmlXPathLink] NVARCHAR(250) NOT NULL, 
     [RegexMatch] NVARCHAR(100) NOT NULL 
 )
