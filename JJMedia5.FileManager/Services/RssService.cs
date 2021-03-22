@@ -35,7 +35,7 @@ namespace JJMedia5.FileManager.Services {
                 var hashes = await ProcessFeed(feed);
                 downloads.AddRange(hashes.Select(h => new RssDownload {
                     Hash = h,
-                    RssFeedId = feed.Id
+                    RssFeedId = feed.Id,
                 }));
             }
 

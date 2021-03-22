@@ -1,7 +1,11 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace JJMedia5.FileManager.Clients {
@@ -45,16 +49,60 @@ namespace JJMedia5.FileManager.Clients {
             }
         }
 
-        public async Task AddHash(string hash) {
-            using (var request = new HttpRequestMessage(new HttpMethod("POST"), $"{_address}/api/v2/torrents/add")) {
+        private Task<HttpResponseMessage> SendGetRequest(string path, HttpContent content = null)
+            => SendRequest(path, HttpMethod.Get, content);
+
+        private Task<HttpResponseMessage> SendPostRequest(string path, HttpContent content = null)
+            => SendRequest(path, HttpMethod.Post, content);
+
+        private async Task<HttpResponseMessage> SendRequest(string path, HttpMethod method, HttpContent content = null) {
+            using (var request = new HttpRequestMessage(method, $"{_address}/{path}")) {
+                // This may seem silly - but it's the safest way to operate.
+                // If every request checks if a new SSID is required, then if the
+                // torrent client is restarted - no requests will error.
                 request.Headers.TryAddWithoutValidation("Cookie", $"{await GetSSID()}");
 
-                using (var multipartContent = new MultipartFormDataContent()) {
-                    multipartContent.Add(new StringContent(hash), "urls");
-                    request.Content = multipartContent;
+                if (content != null) request.Content = content;
+                return await _client.SendAsync(request);
+            }
+        }
 
-                    await _client.SendAsync(request);
-                }
+        public async Task AddHash(string hash) {
+            using (var multipartContent = new MultipartFormDataContent()) {
+                multipartContent.Add(new StringContent(hash), "urls");
+                await SendPostRequest($"api/v2/torrents/add", multipartContent);
+            }
+        }
+
+        public async Task<IEnumerable<string>> GetActiveTorrentPaths() {
+            var response = await SendGetRequest("api/v2/torrents/info");
+            if (response.IsSuccessStatusCode) {
+                string json = await response.Content.ReadAsStringAsync();
+                // dynamics with strings seem to be the safest here
+                // as we get unpredictable results from qbittorrent.
+                var torrents = JArray.Parse(json);
+                return torrents.Where(x => x["amount_left"]?.Value<string>() != "0")
+                                .Select(x => Path.Join(x["save_path"]?.Value<string>(), x["name"]?.Value<string>())).ToArray();
+            }
+            else throw new HttpRequestException($"Failed to connect to QBittorrent: {response.ReasonPhrase}");
+        }
+
+        public async Task RemoveCompleteTorrents() {
+            var response = await SendGetRequest("api/v2/torrents/info");
+            if (!response.IsSuccessStatusCode) throw new HttpRequestException($"Failed to connect to QBittorrent: {response.ReasonPhrase}");
+
+            string json = await response.Content.ReadAsStringAsync();
+
+            // dynamics with strings seem to be the safest here
+            // as we get unpredictable results from qbittorrent.
+            var torrents = JArray.Parse(json);
+            var toRemoveHashes = torrents.Where(x => x["amount_left"]?.Value<string>() == "0")
+                                            .Select(x => x["hash"]?.Value<string>());
+
+            if (toRemoveHashes.Any()) {
+                string address = $"api/v2/torrents/delete?hashes={string.Join('|', toRemoveHashes)}&deleteFiles=false";
+                response = await SendGetRequest(address);
+                if (!response.IsSuccessStatusCode) throw new HttpRequestException($"Failed to delete torrents from QBittorrent: {response.ReasonPhrase}");
             }
         }
     }

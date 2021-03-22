@@ -21,7 +21,7 @@ namespace JJMedia5.FileManager {
 
         private static RssService _rssService = new RssService(new EntityRepository<RssFeed>(_dbManager), new EntityRepository<RssDownload>(_dbManager), _client);
         private static TorrentService _torrentService = new TorrentService(new QBitClient(_client, address: "http://localhost:8080", userName: "admin", password: "adminadmin"));
-        private static FileService _fileService = new FileService(storePaths: new[] { @"G:\JJStores" }, sourcePaths: new[] { @"G:\JJDownloads" });
+        private static FileService _fileService = new FileService(storePaths: new[] { @"G:\JJStores" }, sourcePaths: new[] { @"G:\JJDownloads" }, @"G:\JJProcessing");
 
         private static async Task Main(string[] args) {
             Console.WriteLine("Starting..");
@@ -41,7 +41,7 @@ namespace JJMedia5.FileManager {
 
             // There may have been torrents that failed to move in the past,
             // so we just re-process everything that isn't active.
-            IEnumerable<string> paths = await _torrentService.GetActiveTorrentFilePaths();
+            IEnumerable<string> paths = await _torrentService.GetActiveTorrentPaths();
             await _fileService.ProcessMedia(ignoredPaths: paths);
         }
     }

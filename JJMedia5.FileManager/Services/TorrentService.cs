@@ -1,5 +1,4 @@
 ﻿using JJMedia5.FileManager.Clients;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -12,13 +11,11 @@ namespace JJMedia5.FileManager.Services {
             _client = client;
         }
 
-        public Task RemoveCompleteTorrents() {
-            throw new NotImplementedException();
-        }
+        public Task RemoveCompleteTorrents()
+            => _client.RemoveCompleteTorrents();
 
-        public Task<IEnumerable<string>> GetActiveTorrentFilePaths() {
-            throw new NotImplementedException();
-        }
+        public Task<IEnumerable<string>> GetActiveTorrentPaths()
+            => _client.GetActiveTorrentPaths();
 
         public async Task DownloadHashes(IEnumerable<string> hashes) {
             foreach (var hash in hashes)
