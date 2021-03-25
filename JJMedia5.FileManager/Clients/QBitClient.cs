@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using JJMedia5.Core.Models;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -23,6 +24,13 @@ namespace JJMedia5.FileManager.Clients {
         // because we want to make sure QBit hasn't closed
         // and cleared out our authentication.
         private string _lastSsid;
+
+        public QBitClient(HttpClient client, BasicAuthEndPoint auth) {
+            _client = client;
+            _userName = auth.Username;
+            _password = auth.Password;
+            _address = auth.Address;
+        }
 
         public QBitClient(HttpClient client, string address, string userName, string password) {
             _client = client;

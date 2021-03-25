@@ -1,5 +1,6 @@
 ﻿using JJMedia5.Core.Database;
 using JJMedia5.Core.Entities;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,17 +14,19 @@ namespace JJMedia5.FileManager.Services {
         private readonly IRepository<RssFeed> _rssFeedRepo;
         private readonly IRepository<RssDownload> _rssDownloadRepo;
         private readonly HttpClient _client;
+        private readonly ILogger<RssService> _logger;
 
-        public RssService(IRepository<RssFeed> rssFeedRepo, IRepository<RssDownload> rssDownloadRepo, HttpClient client) {
+        public RssService(IRepository<RssFeed> rssFeedRepo, IRepository<RssDownload> rssDownloadRepo, HttpClient client, ILogger<RssService> logger) {
             _rssFeedRepo = rssFeedRepo;
             _rssDownloadRepo = rssDownloadRepo;
             _client = client;
+            _logger = logger;
         }
 
         public async Task AddHashDownloads(IEnumerable<RssDownload> downloads) {
             // add bulk support for this to improve optimization.
             foreach (var download in downloads)
-                await _rssDownloadRepo.AddAsync(download);
+                download.Id = await _rssDownloadRepo.AddAsync(download);
         }
 
         public async Task<IReadOnlyCollection<RssDownload>> GetNewHashesFromFeeds() {
