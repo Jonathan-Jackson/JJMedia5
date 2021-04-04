@@ -1,12 +1,14 @@
 using FluentValidation.AspNetCore;
 using JJMedia5.Core.Database;
 using JJMedia5.Core.Entities;
+using JJMedia5.Media.Services;
 using JJMedia5.Media.Validators;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using TMDbLib.Client;
 
 namespace JJMedia5 {
 
@@ -26,8 +28,12 @@ namespace JJMedia5 {
                 .AddMvc()
                 .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<RssFeedValidator>());
 
-            services.AddSingleton(new JJMediaDbManager { ConnString = "Data Source=htpc;Persist Security Info=True;User ID=jon;Password=jon;Pooling=False;MultipleActiveResultSets=False;Connect Timeout=60;Encrypt=False;TrustServerCertificate=False;Database=JJMedia5" })
-                .AddSingleton<IRepository<RssFeed>, EntityRepository<RssFeed>>();
+            services
+                .AddSingleton(new JJMediaDbManager(Configuration.GetConnectionString("JJMediaDb")))
+                .AddSingleton<IRepository<RssFeed>, EntityRepository<RssFeed>>()
+                .AddSingleton(new TMDbClient(""))
+                .AddSingleton<SeriesRepository>()
+                .AddTransient<SeriesSearchService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

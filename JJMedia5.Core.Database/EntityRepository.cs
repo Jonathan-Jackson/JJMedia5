@@ -21,7 +21,7 @@ namespace JJMedia5.Core.Database {
             _tableName = ((RepositoryAttribute)typeof(TEntity).GetCustomAttributes(typeof(RepositoryAttribute), false).First()).TableName;
         }
 
-        public Task<int> AddAsync(TEntity entity) {
+        public virtual Task<int> AddAsync(TEntity entity) {
             return ExecAsync(db => db.Query(_tableName)
                 .InsertGetIdAsync<int>(entity.GetPropertyModel()));
         }
@@ -32,7 +32,7 @@ namespace JJMedia5.Core.Database {
                 .DeleteAsync());
         }
 
-        public Task<TEntity> FindAsync(int id) {
+        public virtual Task<TEntity> FindAsync(int id) {
             return ExecAsync(async db => (await db.Query(_tableName)
                                                         .Where("Id", id)
                                                         .FirstOrDefaultAsync<TEntity>()));
@@ -45,7 +45,7 @@ namespace JJMedia5.Core.Database {
                                                           .ToArray());
         }
 
-        public Task<int> UpdateAsync(TEntity entity) {
+        public virtual Task<int> UpdateAsync(TEntity entity) {
             return ExecAsync(db => db.Query(_tableName)
                 .Where("id", entity.Id)
                 .UpdateAsync(entity.GetPropertyModel()));
