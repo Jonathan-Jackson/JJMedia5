@@ -36,10 +36,12 @@ namespace JJMedia5.FileManager.Services {
             var downloads = new List<RssDownload>();
             foreach (var feed in feeds) {
                 var hashes = await ProcessFeed(feed);
-                downloads.AddRange(hashes.Select(h => new RssDownload {
-                    Hash = h,
-                    RssFeedId = feed.Id,
-                }));
+                downloads.AddRange(hashes
+                    .Where(h => !string.IsNullOrWhiteSpace(h))
+                    .Select(h => new RssDownload {
+                        Hash = h,
+                        RssFeedId = feed.Id,
+                    }));
             }
 
             // remove any already downloaded.
@@ -96,7 +98,7 @@ namespace JJMedia5.FileManager.Services {
                 if (DateTimeOffset.TryParse(pubDate.InnerText, out DateTimeOffset date)
                     && date > feed.StartDate) {
                     var hashNode = node["nyaa:infoHash"];
-                    yield return hashNode.InnerText;
+                    yield return hashNode?.InnerText ?? string.Empty;
                 }
             }
         }

@@ -49,6 +49,12 @@ namespace JJMedia5.FileManager.Services {
             // Add a static wait after moving files to ensure windows
             // has cleaned up file handles
             await Task.Delay(5_000);
+
+            // Get the new name from our media service.
+
+            // Move with new name.
+
+            // Register in the database.
         }
 
         private string GetFreeProcessingPath()

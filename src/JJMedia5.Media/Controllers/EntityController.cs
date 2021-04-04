@@ -9,7 +9,7 @@ namespace JJMedia5.MediaSubscription.Controllers {
 
     [ApiController]
     public class EntityController<TEntity> : Controller where TEntity : Entity {
-        private readonly IRepository<TEntity> _repo;
+        protected readonly IRepository<TEntity> _repo;
 
         public EntityController(IRepository<TEntity> repo) {
             _repo = repo;

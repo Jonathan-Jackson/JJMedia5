@@ -17,13 +17,12 @@ using System.Threading.Tasks;
 namespace JJMedia5.FileManager {
 
     internal static class Program {
+        private static FileService _fileService;
         private static ILogger<object> _logger;
         private static IServiceProvider _provider;
-
-        private static FileService _fileService;
-        private static TorrentService _torrentService;
         private static RssService _rssService;
         private static SemaphoreSlim _semaphore;
+        private static TorrentService _torrentService;
 
         private static async Task Main(string[] args) {
             _provider = SetupDependencies();
@@ -36,29 +35,6 @@ namespace JJMedia5.FileManager {
 
             _logger.LogInformation("Application Startup Complete.");
             await Task.WhenAll(PollFeeds(), PollCompleteFiles());
-        }
-
-        private static IServiceProvider SetupDependencies() {
-            IConfiguration config = new ConfigurationBuilder()
-                            .AddJsonFile("appsettings.json", true, true)
-                            .Build();
-
-            IServiceCollection services = new ServiceCollection();
-            // Remote Dependencies.
-            services.AddSingleton<HttpClient>()
-                .AddSingleton(config.GetSection("TorrentClientOptions").Get<BasicAuthEndPoint>())
-                .AddSingleton(config.GetSection("StorageOptions").Get<StorageOptions>())
-                .AddSingleton(new JJMediaDbManager(config.GetConnectionString("JJMediaDb")));
-            // Local Dependencies.
-            services.AddSingleton<IRepository<RssFeed>, EntityRepository<RssFeed>>()
-                .AddSingleton<IRepository<RssDownload>, EntityRepository<RssDownload>>()
-                .AddSingleton<RssService>()
-                .AddSingleton<ITorrentClient, QBitClient>()
-                .AddSingleton<TorrentService>()
-                .AddSingleton<FileService>()
-                .AddLogging(configure => configure.AddConsole());
-
-            return services.BuildServiceProvider();
         }
 
         private static async Task PollCompleteFiles() {
@@ -93,7 +69,9 @@ namespace JJMedia5.FileManager {
                     if (toDownload.Any()) {
                         await _torrentService.DownloadHashes(toDownload.Select(d => d.Hash));
                         await _rssService.AddHashDownloads(toDownload);
-                        foreach (var download in toDownload) _logger.LogInformation($"Downloaded New Hash: {download.Id}");
+                        foreach (var download in toDownload) {
+                            _logger.LogInformation($"Downloaded New Hash: {download.Id}");
+                        }
                     }
                 }
                 catch (Exception ex) {
@@ -103,6 +81,29 @@ namespace JJMedia5.FileManager {
                     _semaphore.Release();
                 }
             }
+        }
+
+        private static IServiceProvider SetupDependencies() {
+            IConfiguration config = new ConfigurationBuilder()
+                            .AddJsonFile("appsettings.json", true, true)
+                            .Build();
+
+            IServiceCollection services = new ServiceCollection();
+            // Remote Dependencies.
+            services.AddSingleton<HttpClient>()
+                .AddSingleton(config.GetSection("TorrentClientOptions").Get<BasicAuthEndPoint>())
+                .AddSingleton(config.GetSection("StorageOptions").Get<StorageOptions>())
+                .AddSingleton(new JJMediaDbManager(config.GetConnectionString("JJMediaDb")));
+            // Local Dependencies.
+            services.AddSingleton<IRepository<RssFeed>, EntityRepository<RssFeed>>()
+                .AddSingleton<IRepository<RssDownload>, EntityRepository<RssDownload>>()
+                .AddSingleton<RssService>()
+                .AddSingleton<ITorrentClient, QBitClient>()
+                .AddSingleton<TorrentService>()
+                .AddSingleton<FileService>()
+                .AddLogging(configure => configure.AddConsole());
+
+            return services.BuildServiceProvider();
         }
     }
 }
