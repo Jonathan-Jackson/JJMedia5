@@ -1,4 +1,3 @@
-using Elastic.Apm.NetCoreAll;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
@@ -13,7 +12,8 @@ namespace JJMedia5 {
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder => {
-                    webBuilder.UseStartup<Startup>();
-                }).UseAllElasticApm();
+                    webBuilder.UseStartup<Startup>()
+                    .UseUrls("http://*:4444");
+                });//.UseAllElasticApm();
     }
 }

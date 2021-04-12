@@ -1,4 +1,5 @@
 ﻿using JJMedia5.Core.Attributes;
+using JJMedia5.Core.Enums;
 using System;
 
 namespace JJMedia5.Core.Entities {
@@ -13,11 +14,17 @@ namespace JJMedia5.Core.Entities {
 
         public DateTimeOffset AddedOn { get; set; } = DateTimeOffset.UtcNow;
 
+        public string SourceId { get; set; }
+
+        public eSeriesApi SourceApi { get; set; }
+
         public override object GetPropertyModel()
             => new {
                 Description,
                 AirDate,
-                AddedOn
+                AddedOn,
+                SourceId,
+                SourceApi
             };
     }
 }

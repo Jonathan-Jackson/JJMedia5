@@ -48,6 +48,8 @@ namespace JJMedia5.FileManager {
                     // so we just re-process everything that isn't active.
                     IEnumerable<string> paths = await _torrentService.GetActiveTorrentPaths();
                     await _fileService.ProcessMedia(ignoredPaths: paths);
+
+                    _logger.LogInformation("Poll for completed files has finished.");
                 }
                 catch (Exception ex) {
                     _logger.LogError(ex, "Error thrown on polling for complete files.");
@@ -62,9 +64,10 @@ namespace JJMedia5.FileManager {
             for (; ; await Task.Delay(600_000)) {
                 try {
                     await _semaphore.WaitAsync();
+
                     // We want to process these
                     // in sequence, to avoid disrupting a previous step.
-                    var toDownload = await _rssService.GetNewHashesFromFeeds();
+                    var toDownload = (await _rssService.GetNewHashesFromFeeds()).TakeLast(10);
 
                     if (toDownload.Any()) {
                         await _torrentService.DownloadHashes(toDownload.Select(d => d.Hash));
@@ -72,7 +75,14 @@ namespace JJMedia5.FileManager {
                         foreach (var download in toDownload) {
                             _logger.LogInformation($"Downloaded New Hash: {download.Id}");
                         }
+
+                        // add a slight delay for the above to register correctly in
+                        // the torrent client - otherwise we'll skip too far ahead &
+                        // pick up files that aren't properly registered in our torrent client.
+                        await Task.Delay(5000);
                     }
+
+                    _logger.LogInformation("Poll for feeds has finished.");
                 }
                 catch (Exception ex) {
                     _logger.LogError(ex, "Error thrown on polling feeds.");

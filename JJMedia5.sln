@@ -19,9 +19,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "common", "common", "{AEABE5
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "services", "services", "{FC39098C-6154-46BC-9C76-276929897821}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JJMedia5.FileManager", "JJMedia5.FileManager\JJMedia5.FileManager.csproj", "{E6FF7A0D-B514-411C-81A3-8D7AD01E15E6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JJMedia5.FileManager", "src\JJMedia5.FileManager\JJMedia5.FileManager.csproj", "{E6FF7A0D-B514-411C-81A3-8D7AD01E15E6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JJMedia5.Core.Database", "JJMedia5.Core.Database\JJMedia5.Core.Database.csproj", "{9CD8419E-D37B-42E8-AB6B-164DBA1B7CA2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JJMedia5.Core.Database", "src\JJMedia5.Core.Database\JJMedia5.Core.Database.csproj", "{9CD8419E-D37B-42E8-AB6B-164DBA1B7CA2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

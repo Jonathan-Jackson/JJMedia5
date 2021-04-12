@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
+    <UserSecretsId>4ca33834-ba61-4c8b-9398-b948c3bcd32a</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\JJMedia5.Core.Database\JJMedia5.Core.Database.csproj" />
+    <ProjectReference Include="..\JJMedia5.Core.Database\JJMedia5.Core.Database.csproj" />
     <ProjectReference Include="..\JJMedia5.Core\JJMedia5.Core.csproj" />
   </ItemGroup>
 </Project>

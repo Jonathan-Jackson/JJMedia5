@@ -1,60 +1,77 @@
 ﻿using JJMedia5.Core.Database;
 using JJMedia5.Core.Entities;
+using JJMedia5.Core.Enums;
+using JJMedia5.Media.Helpers;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using TMDbLib.Client;
 
 namespace JJMedia5.Media.Services {
 
-    public class SeriesSearchService : SearchService<Series> {
-        private readonly SeriesRepository _repo;
+    public class SeriesSearchService {
         private readonly TMDbClient _apiClient;
+        private readonly SeriesRepository _repo;
 
         public SeriesSearchService(TMDbClient tvDbClient, SeriesRepository repo) {
             _apiClient = tvDbClient;
             _repo = repo;
         }
 
-        protected override Task<int> AddSearchResultToDatabaseAsync(Series result)
-            => _repo.AddAsync(result);
-
-        protected override IEnumerable<string> CreatePrioritySearches(string searchValue) {
-            yield return searchValue;
-
-            // this needs a proper implementation
-            // as it can be quite complex
-            // for now i've done a 5 minute job
-            // - remove episode ending
-            // - just remove pretty obvious season notations
-            // - funky characters (often sub names)
-            // - cut off the last sentence if a certain length
-            string modified = searchValue.Trim();
-
-            if (modified.Contains('-') && modified.Length > 5) {
-                modified = modified.Substring(0, modified.LastIndexOf('-')).Trim();
-                yield return modified;
+        public async Task<Series> FindAsync(string fileName) {
+            foreach (var value in GetPossibleOrderedSeriesSearchValues(fileName)) {
+                var result = await FindByValueAsync(value);
+                if (result != null) {
+                    return result;
+                }
             }
 
-            if (modified != Regex.Replace(modified, @"\[.*\]", "")) {
-                modified = Regex.Replace(modified, @"\[.*\]", "").Trim();
-                yield return modified;
-            }
-
-            if (modified != Regex.Replace(modified, @"\(.*\)", "")) {
-                modified = Regex.Replace(modified, @"\(.*\)", "").Trim();
-                yield return modified;
-            }
-
-            if (modified.Contains(' ') && modified.Length > 5) {
-                modified = modified.Substring(0, modified.LastIndexOf(' ')).Trim();
-                yield return modified;
-            }
+            // not found.
+            return null;
         }
 
-        protected override async Task<Series> FindInAPIAsync(string searchValue) {
+        public async Task<Series> FindByValueAsync(string value) {
+            Series result = await FindInDatabaseAsync(value);
+
+            if (result != null)
+                return result;
+
+            result = await FindInAPIAsync(value);
+
+            if (result != null) {
+                result.Id = await AddSearchResultToDatabaseAsync(result);
+                return result;
+            }
+            return null;
+        }
+
+        public IEnumerable<string> GetPossibleOrderedSeriesSearchValues(string fileName) {
+            string noExtension = Path.GetFileNameWithoutExtension(fileName).Trim();
+            string noMetadata = MediaNameHelper.RemoveMetadata(noExtension).Trim();
+
+            string noEpisode = MediaNameHelper.RemoveEpisode(noMetadata).Trim();
+            yield return noEpisode;
+
+            string noSeason = MediaNameHelper.RemoveSeasonNotation(noEpisode).Trim();
+            yield return noSeason;
+
+            // remove the last word ~ this is odd, but it's a last ditch,
+            // and often we get shows with silly names at the end.
+            if (noSeason.Contains(' ') && noSeason.Length > 8) {
+                yield return noSeason.Substring(0, noSeason.LastIndexOf(' ')).Trim();
+            }
+
+            // return the full one as the lowest priority (without an extension).
+            yield return noMetadata;
+            yield return noExtension;
+        }
+
+        protected Task<int> AddSearchResultToDatabaseAsync(Series result)
+            => _repo.AddAsync(result);
+
+        protected async Task<Series> FindInAPIAsync(string searchValue) {
             var result = await _apiClient.SearchTvShowAsync(searchValue);
             if (!result.Results.Any())
                 return null;
@@ -79,12 +96,14 @@ namespace JJMedia5.Media.Services {
 
             return new Series {
                 Description = foundSeries.Overview,
-                AirDate = foundSeries?.FirstAirDate,
-                Titles = titles.Where(s => !string.IsNullOrWhiteSpace(s.Title)).ToArray()
+                AirDate = foundSeries.FirstAirDate,
+                Titles = titles.Where(s => !string.IsNullOrWhiteSpace(s.Title)).ToArray(),
+                SourceApi = eSeriesApi.TheMovieDb,
+                SourceId = foundSeries.Id.ToString()
             };
         }
 
-        protected override async Task<Series> FindInDatabaseAsync(string searchValue) {
+        protected async Task<Series> FindInDatabaseAsync(string searchValue) {
             int showId = await _repo.FindIdByTitleNameAsync(searchValue);
 
             return showId > 0

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
 
@@ -78,12 +79,22 @@ namespace JJMedia5.FileManager.Services {
                 var pubDate = node["pubDate"];
 
                 // If the date is valid AND is past the pub date, lets go.
-                if (DateTimeOffset.TryParse(pubDate.InnerText, out DateTimeOffset date)
+                if (IsFeedRegexMatch(feed, node) && DateTimeOffset.TryParse(pubDate.InnerText, out DateTimeOffset date)
                     && date > feed.StartDate) {
                     var hashNode = node["link"];
                     yield return hashNode.InnerText;
                 }
             }
+        }
+
+        private bool IsFeedRegexMatch(RssFeed feed, XmlNode node) {
+            if (string.IsNullOrWhiteSpace(feed.RegexMatch))
+                return true;
+
+            var title = node["title"]?.InnerText?.Trim() ?? string.Empty;
+            var regex = new Regex(feed.RegexMatch);
+
+            return regex.Match(title).Success;
         }
 
         private IEnumerable<string> GetHashesFromNyaaXML(string xml, RssFeed feed) {

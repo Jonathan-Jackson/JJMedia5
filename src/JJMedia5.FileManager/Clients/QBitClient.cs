@@ -11,11 +11,7 @@ using System.Threading.Tasks;
 
 namespace JJMedia5.FileManager.Clients {
 
-    public class QBitClient : ITorrentClient {
-        private readonly string _userName;
-        private readonly string _address;
-        private readonly string _password;
-        private readonly HttpClient _client;
+    public class QBitClient : ClientBase, ITorrentClient {
 
         // hold the previous ssid we got,
         // as QBittorrent won't send a new one
@@ -25,18 +21,8 @@ namespace JJMedia5.FileManager.Clients {
         // and cleared out our authentication.
         private string _lastSsid;
 
-        public QBitClient(HttpClient client, BasicAuthEndPoint auth) {
-            _client = client;
-            _userName = auth.Username;
-            _password = auth.Password;
-            _address = auth.Address;
-        }
-
-        public QBitClient(HttpClient client, string address, string userName, string password) {
-            _client = client;
-            _userName = userName;
-            _password = password;
-            _address = address;
+        public QBitClient(HttpClient client, BasicAuthEndPoint auth)
+            : base(client, auth) {
         }
 
         private async Task<string> GetSSID() {
@@ -89,7 +75,7 @@ namespace JJMedia5.FileManager.Clients {
                 // dynamics with strings seem to be the safest here
                 // as we get unpredictable results from qbittorrent.
                 var torrents = JArray.Parse(json);
-                return torrents.Where(x => x["amount_left"]?.Value<string>() != "0")
+                return torrents.Where(x => x["amount_left"]?.Value<string>() != "0" || string.Equals(x["state"]?.Value<string>(), "queuedDL", StringComparison.OrdinalIgnoreCase))
                                 .Select(x => Path.Join(x["save_path"]?.Value<string>(), x["name"]?.Value<string>())).ToArray();
             }
             else throw new HttpRequestException($"Failed to connect to QBittorrent: {response.ReasonPhrase}");

@@ -1,6 +1,7 @@
 ﻿using JJMedia5.Core.Attributes;
 using JJMedia5.Core.Entities;
 using SqlKata.Execution;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -13,19 +14,36 @@ namespace JJMedia5.Core.Database {
             : base(connectionInfo) {
         }
 
+        public async Task<Series> FindBySourceAsync(int id) {
+            // this needs to be better optimized
+            // for now lets just be laaazy.
+            var series = await base.FindAsync(id);
+
+            if (series != null) {
+                series.Titles = (await GetSeriesTitles(id)).ToArray();
+            }
+
+            return series;
+        }
+
         public override async Task<Series> FindAsync(int id) {
             // this needs to be better optimized
             // for now lets just be laaazy.
             var series = await base.FindAsync(id);
 
-            series.Titles = (await ExecAsync(db => db
-                .Query(_titlesTableName)
-                .Where("SeriesId", id)
-                .GetAsync<SeriesTitle>()))
-                .ToArray();
+            if (series != null) {
+                series.Titles = (await GetSeriesTitles(id)).ToArray();
+            }
 
             return series;
         }
+
+        // move into own repo..
+        private Task<IEnumerable<SeriesTitle>> GetSeriesTitles(int seriesId)
+            => ExecAsync(db => db
+                .Query(_titlesTableName)
+                .Where("SeriesId", seriesId)
+                .GetAsync<SeriesTitle>());
 
         public Task<int> FindIdByTitleNameAsync(string titleName) {
             // We should use a series title repository...

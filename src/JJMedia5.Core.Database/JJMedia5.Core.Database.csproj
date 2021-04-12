@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\JJMedia5.Core\JJMedia5.Core.csproj" />
+    <ProjectReference Include="..\JJMedia5.Core\JJMedia5.Core.csproj" />
   </ItemGroup>
 
 </Project>

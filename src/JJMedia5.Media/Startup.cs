@@ -31,9 +31,12 @@ namespace JJMedia5 {
             services
                 .AddSingleton(new JJMediaDbManager(Configuration.GetConnectionString("JJMediaDb")))
                 .AddSingleton<IRepository<RssFeed>, EntityRepository<RssFeed>>()
-                .AddSingleton(new TMDbClient(""))
+                .AddSingleton(new TMDbClient(Configuration.GetValue<string>("TmdbKey")))
+                .AddSingleton<SeriesEpisodeSearchService>()
                 .AddSingleton<SeriesRepository>()
-                .AddTransient<SeriesSearchService>();
+                .AddSingleton<EpisodeRepository>()
+                .AddTransient<SeriesSearchService>()
+                .AddTransient<EpisodeSearchService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
