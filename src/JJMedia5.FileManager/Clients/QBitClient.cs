@@ -81,7 +81,7 @@ namespace JJMedia5.FileManager.Clients {
             else throw new HttpRequestException($"Failed to connect to QBittorrent: {response.ReasonPhrase}");
         }
 
-        public async Task RemoveCompleteTorrents() {
+        public async Task<string[]> RemoveCompleteTorrents() {
             var response = await SendGetRequest("api/v2/torrents/info");
             if (!response.IsSuccessStatusCode) throw new HttpRequestException($"Failed to connect to QBittorrent: {response.ReasonPhrase}");
 
@@ -90,14 +90,16 @@ namespace JJMedia5.FileManager.Clients {
             // dynamics with strings seem to be the safest here
             // as we get unpredictable results from qbittorrent.
             var torrents = JArray.Parse(json);
-            var toRemoveHashes = torrents.Where(x => x["amount_left"]?.Value<string>() == "0")
-                                            .Select(x => x["hash"]?.Value<string>());
+            var toRemove = torrents.Where(x => x["amount_left"]?.Value<string>() == "0" && x["downloaded"]?.Value<string>() != "0").ToArray();
+            var toRemoveHashes = toRemove.Select(x => x["hash"]?.Value<string>());
 
             if (toRemoveHashes.Any()) {
                 string address = $"api/v2/torrents/delete?hashes={string.Join('|', toRemoveHashes)}&deleteFiles=false";
                 response = await SendGetRequest(address);
                 if (!response.IsSuccessStatusCode) throw new HttpRequestException($"Failed to delete torrents from QBittorrent: {response.ReasonPhrase}");
             }
+
+            return toRemove.Select(x => Path.Join(x["save_path"]?.Value<string>(), x["name"]?.Value<string>())).ToArray();
         }
     }
 }

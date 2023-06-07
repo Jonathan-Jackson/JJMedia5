@@ -9,6 +9,6 @@ namespace JJMedia5.FileManager.Clients {
 
         Task<IEnumerable<string>> GetActiveTorrentPaths();
 
-        Task RemoveCompleteTorrents();
+        Task<string[]> RemoveCompleteTorrents();
     }
 }

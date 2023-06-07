@@ -8,7 +8,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using TMDbLib.Client;
 
-namespace JJMedia5.Media.Services {
+namespace JJMedia5.Media.Services
+{
 
     public class EpisodeSearchService {
         private readonly EpisodeRepository _repo;
@@ -23,7 +24,7 @@ namespace JJMedia5.Media.Services {
             var noExtension = Path.GetFileNameWithoutExtension(fileName);
 
             int episodeNumber = FindEpisodeNumber(noExtension);
-            int seasonNumber = FindSeasonNumber(series, noExtension);
+            int seasonNumber = await FindSeasonNumberAsync(series, noExtension);
 
             // check the database!
             Episode result = await _repo.FindAsync(episodeNumber, seasonNumber, series.Id);
@@ -45,18 +46,37 @@ namespace JJMedia5.Media.Services {
             if (string.IsNullOrWhiteSpace(series.SourceId) || series.SourceApi != eSeriesApi.TheMovieDb)
                 return null;
 
-            var result = await _apiClient.GetTvEpisodeAsync(int.Parse(series.SourceId), seasonNumber, episodeNumber);
+            int sourceId = int.Parse(series.SourceId);
+            var result = await _apiClient.GetTvEpisodeAsync(sourceId, seasonNumber, episodeNumber);
+            if (result == null && episodeNumber > 10) {
+                // Do some dumb checks here.
+                // Because hte episode couldn't be found,
+                // we're going to try searching through seasons
+                // and seeing if we can calculate were this lands.
+                // Later on we can improve accuracy by adding hints to requests.
+                var apiSeires = await _apiClient.GetTvShowAsync(sourceId);
+                var seasons = apiSeires.Seasons.Where(s => s.SeasonNumber > 0);
+
+                // we don't modify the original season as that appears correct
+                // from within the api, however some APIs use the absolute number
+                // to represent the episode number which is a bit weird.
+                int newSeason = 0;
+                foreach (var season in seasons) {
+                    if (episodeNumber - season.EpisodeCount > 0) {
+                        episodeNumber -= season.EpisodeCount;
+                        newSeason = season.SeasonNumber;
+                    }
+                    else {
+                        break;
+                    }
+                }
+
+                if (seasonNumber > 0) {
+                    result = await _apiClient.GetTvEpisodeAsync(sourceId, newSeason, episodeNumber);
+                }
+            }
+
             if (result == null) {
-                // if it's a really high number, check our end point to see
-                // if the episode number we have is an AbsoluteNumber rather
-                // than EpisodeNumber
-
-                // -- find how many episodes in the season so far
-
-                // -- are we +1 more then that?? And a season 2 exists???
-
-                // ok probs absolute.
-
                 return null;
             }
 
@@ -66,20 +86,40 @@ namespace JJMedia5.Media.Services {
                 AiredOn = result.AirDate,
                 Description = result.Overview ?? string.Empty,
                 Title = result.Name ?? string.Empty,
-                EpisodeNumber = result.EpisodeNumber,
+                EpisodeNumber = episodeNumber,
                 SeasonNumber = result.SeasonNumber,
                 SeriesId = series.Id
             };
         }
 
-        private int FindSeasonNumber(Series series, string fileName) {
+        private async Task<int> FindSeasonNumberAsync(Series series, string fileName) {
             var removedMetadata = MediaNameHelper.RemoveMetadata(fileName);
-
             // TODO: add regex to pattern match on S{digit}E{digit}.
-            var fileParts = removedMetadata.Split('-');
 
-            // for now, we just look for special notation
-            // we can also look at our db to see latest season & if already exists?
+            var removedEpisode = MediaNameHelper.RemoveEpisode(fileName).Trim();
+
+            // Do we have at the end, or the second to last sentance,
+            var atEnd = removedEpisode.Split(' ', StringSplitOptions.RemoveEmptyEntries).TakeLast(2);
+
+            foreach (string value in atEnd) {
+                if (value.StartsWith("s", StringComparison.OrdinalIgnoreCase)
+                    && value.Skip(1).All(char.IsDigit)
+                    && int.TryParse(string.Concat(value.Skip(1)), out int season)) {
+                    return season;
+                }
+
+                if (MediaNameHelper.SpecialSeasonNotations.Contains(value))
+                    return 0;
+            }
+
+            // What's the latest season on the API?
+            var apiResult = await _apiClient.GetTvShowAsync(int.Parse(series.SourceId));
+            var validSeasons = apiResult?.Seasons.Where(s => s.AirDate != null && s.AirDate < DateTime.UtcNow);
+            if (validSeasons.Any() == true) {
+                return validSeasons.Max(s => s.SeasonNumber);
+            }
+
+            // Check folders..!
 
             return 1;
         }

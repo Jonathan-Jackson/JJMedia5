@@ -56,15 +56,22 @@
   <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
   <ItemGroup>
     <Folder Include="Properties" />
+    <Folder Include="tables" />
+    <Folder Include="scripts" />
   </ItemGroup>
   <ItemGroup>
-    <Build Include="RssFeeds.sql" />
-    <Build Include="RssDownload.sql" />
-    <Build Include="Series.sql" />
-    <Build Include="SeriesTitles.sql" />
-    <Build Include="Episodes.sql" />
+    <Build Include="tables\Episodes.sql" />
+    <Build Include="tables\RssDownload.sql" />
+    <Build Include="tables\Series.sql" />
+    <Build Include="tables\RssFeeds.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="JJMedia5.Database.refactorlog" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="tables\SeriesTitles.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <PostDeploy Include="scripts\subsplease-feed.sql" />
   </ItemGroup>
 </Project>

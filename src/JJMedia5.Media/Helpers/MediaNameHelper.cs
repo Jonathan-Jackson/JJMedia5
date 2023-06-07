@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace JJMedia5.Media.Helpers {
@@ -56,13 +57,19 @@ namespace JJMedia5.Media.Helpers {
             return output;
         }
 
+        public static readonly IReadOnlyCollection<string> SpecialSeasonNotations = new HashSet<string> {
+            "ova",
+            "special",
+            "movie",
+            "ovd",
+            "short"
+        };
+
         public static string RemoveSeasonNotation(string value) {
             string output = value.Trim();
 
             // this certainly needs to be more complex in the future.. let's just be lazy
-            var specialNames = new[] { " ova", " special", " movie", " ovd" };
-            var toRemove = specialNames.Where(output.EndsWith);
-
+            var toRemove = SpecialSeasonNotations.Where(s => output.EndsWith(' ' + s));
             foreach (string name in toRemove) {
                 output = output.Substring(0, output.LastIndexOf(name)).Trim();
             }
