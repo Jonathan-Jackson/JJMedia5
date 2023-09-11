@@ -66,11 +66,10 @@ namespace JJMedia5.Main {
 
         private static void SetupMediaDependencies(IConfiguration config, IServiceCollection services) {
             // Local Dependencies.
-            services.AddSingleton<IEpisodeLookupService, EpisodeLookupService>()
-                .AddSingleton<SeriesEpisodeSearchService>()
+            services
                 .AddSingleton<IRepository<RssFeed>, EntityRepository<RssFeed>>()
                 .AddSingleton(new TMDbClient(config.GetValue<string>("TmdbKey")))
-                .AddSingleton<SeriesEpisodeSearchService>()
+                .AddSingleton<ISeriesEpisodeSearchService, SeriesEpisodeSearchService>()
                 .AddSingleton<SeriesRepository>()
                 .AddSingleton<EpisodeRepository>()
                 .AddTransient<SeriesSearchService>()

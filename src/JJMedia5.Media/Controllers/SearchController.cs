@@ -1,4 +1,5 @@
-﻿using JJMedia5.Media.Services;
+﻿using JJMedia5.Core.Interfaces;
+using JJMedia5.Media.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
@@ -7,9 +8,9 @@ namespace JJMedia5.MediaSubscription.Controllers {
     [Route("api/v1/[controller]")]
     public class SearchController : Controller {
         private readonly SeriesSearchService _seriesSearch;
-        private readonly SeriesEpisodeSearchService _seriesEpisodeSearch;
+        private readonly ISeriesEpisodeSearchService _seriesEpisodeSearch;
 
-        public SearchController(SeriesSearchService seriesSearch, SeriesEpisodeSearchService seriesEpisodeSearch) {
+        public SearchController(SeriesSearchService seriesSearch, ISeriesEpisodeSearchService seriesEpisodeSearch) {
             _seriesSearch = seriesSearch;
             _seriesEpisodeSearch = seriesEpisodeSearch;
         }

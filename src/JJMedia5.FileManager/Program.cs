@@ -50,7 +50,7 @@ namespace JJMedia5.FileManager {
                 .AddSingleton<ITorrentClient, QBitClient>()
                 .AddSingleton<TorrentService>()
                 .AddSingleton<FileService>()
-                .AddSingleton<IEpisodeLookupService, HttpShowService>()
+                .AddSingleton<ISeriesEpisodeSearchService, HttpShowService>()
                 .AddLogging(configure => configure.AddConsole());
 
             return services.BuildServiceProvider();

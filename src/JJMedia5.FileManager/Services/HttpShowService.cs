@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Web;
 
 namespace JJMedia5.FileManager.Services {
-    public class HttpShowService : IEpisodeLookupService {
+    public class HttpShowService : ISeriesEpisodeSearchService {
 
         private readonly HttpClient _client;
         private readonly string _mediaApiAddress;
@@ -18,7 +18,7 @@ namespace JJMedia5.FileManager.Services {
         }
 
 
-        public async Task<EpisodeSeriesInfo> FindEpisodeSeriesInfoAsync(string fileName) {
+        public async Task<EpisodeSeriesInfo> FindAsync(string fileName) {
             var result = await _client.GetAsync($"{_mediaApiAddress}search/seriesepisode?filename={HttpUtility.UrlEncode(fileName)}");
 
             if (result.IsSuccessStatusCode) {

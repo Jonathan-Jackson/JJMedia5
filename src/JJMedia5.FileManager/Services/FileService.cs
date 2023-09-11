@@ -17,7 +17,7 @@ namespace JJMedia5.FileManager.Services {
         private readonly ILogger<FileService> _logger;
         private readonly IReadOnlyCollection<string> _mediaPaths;
         private readonly IReadOnlyCollection<string> _processingPaths;
-        private readonly IEpisodeLookupService _showService;
+        private readonly ISeriesEpisodeSearchService _showService;
 
 
         private IReadOnlyCollection<string> ValidMediaFileExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
@@ -26,7 +26,7 @@ namespace JJMedia5.FileManager.Services {
             ".mkv"
         };
 
-        public FileService(StorageOptions options, IEpisodeLookupService showService, ILogger<FileService> logger) {
+        public FileService(StorageOptions options, ISeriesEpisodeSearchService showService, ILogger<FileService> logger) {
             if (options.ProcessingPaths == null || options.ProcessingPaths.Length < 1 || options.ProcessingPaths.Any(string.IsNullOrWhiteSpace))
                 throw new ArgumentException($"ProcessingPaths is empty - this is required to find were to push files to.");
             if (options.MediaPaths == null || options.MediaPaths.Length < 1 || options.MediaPaths.Any(string.IsNullOrWhiteSpace))
@@ -124,7 +124,7 @@ namespace JJMedia5.FileManager.Services {
                 }
 
                 // get episode info from api.
-                EpisodeSeriesInfo episodeInfo = episodeInfo = await _showService.FindEpisodeSeriesInfoAsync(Path.GetFileName(path));
+                EpisodeSeriesInfo episodeInfo = episodeInfo = await _showService.FindAsync(Path.GetFileName(path));
                 if (episodeInfo == null) {
                     _logger.LogWarning($"Could not find episode info for '{path}'");
                     // LOG FILE FAILURE TO LEARN TO SKIP AFTER X ATTEMPTS...
@@ -142,7 +142,7 @@ namespace JJMedia5.FileManager.Services {
                 if (File.Exists(output))
                     await FileHelper.RetryDeleteAsync(output);
 
-                await FileHelper.RetryMoveAsync(path, output);
+                await FileHelper.RetryMoveAsync(path, output, throwOnFinalException: true);
 
                 _logger.LogInformation($"New File Added to Media Store: {output}");
             }

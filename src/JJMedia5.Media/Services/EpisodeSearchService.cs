@@ -50,7 +50,7 @@ namespace JJMedia5.Media.Services
             var result = await _apiClient.GetTvEpisodeAsync(sourceId, seasonNumber, episodeNumber);
             if (result == null && episodeNumber > 10) {
                 // Do some dumb checks here.
-                // Because hte episode couldn't be found,
+                // Because the episode couldn't be found,
                 // we're going to try searching through seasons
                 // and seeing if we can calculate were this lands.
                 // Later on we can improve accuracy by adding hints to requests.
@@ -71,9 +71,29 @@ namespace JJMedia5.Media.Services
                     }
                 }
 
-                if (seasonNumber > 0) {
+                if (newSeason > 0) {
                     result = await _apiClient.GetTvEpisodeAsync(sourceId, newSeason, episodeNumber);
                 }
+
+                // Check if the last episode of the latest season is 6 montths after it aired,
+                // this is getting into dangerous best guess territory but unsure alternatives?
+                // Sometimes we get 'Season 2 Episode 1' which is actually episode '13' of Season 1, it gets weird.
+                var latestSeason = seasons.Where(s => s.AirDate < DateTime.UtcNow)
+                                            .OrderByDescending(s => s.SeasonNumber)
+                                            .FirstOrDefault();
+
+                if (latestSeason != null) {
+                    var lastEp = await _apiClient.GetTvEpisodeAsync(sourceId, latestSeason.SeasonNumber, latestSeason.EpisodeCount);
+                    
+                    while (lastEp != null && (lastEp.AirDate == null || lastEp.AirDate > DateTime.UtcNow)) {
+                        lastEp = await _apiClient.GetTvEpisodeAsync(sourceId, newSeason, lastEp.EpisodeNumber);
+                    }
+
+                    if (lastEp != null && lastEp.AirDate > latestSeason.AirDate.Value.AddMonths(6)) {
+                        result = lastEp;
+                    }
+                }
+
             }
 
             if (result == null) {
@@ -86,7 +106,7 @@ namespace JJMedia5.Media.Services
                 AiredOn = result.AirDate,
                 Description = result.Overview ?? string.Empty,
                 Title = result.Name ?? string.Empty,
-                EpisodeNumber = episodeNumber,
+                EpisodeNumber = result.EpisodeNumber,
                 SeasonNumber = result.SeasonNumber,
                 SeriesId = series.Id
             };
@@ -95,6 +115,15 @@ namespace JJMedia5.Media.Services
         private async Task<int> FindSeasonNumberAsync(Series series, string fileName) {
             var removedMetadata = MediaNameHelper.RemoveMetadata(fileName);
             // TODO: add regex to pattern match on S{digit}E{digit}.
+
+            if (fileName.Contains("Season", StringComparison.OrdinalIgnoreCase)) {
+                int i = fileName.IndexOf("Season", StringComparison.OrdinalIgnoreCase);
+                string sub = fileName.Substring(i + 6).Trim();
+
+                if (sub.Any() && char.IsDigit(sub.First())) {
+                    return int.Parse(string.Concat(sub.TakeWhile(char.IsDigit)));
+                }
+            }
 
             var removedEpisode = MediaNameHelper.RemoveEpisode(fileName).Trim();
 

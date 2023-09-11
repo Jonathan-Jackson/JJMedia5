@@ -77,7 +77,7 @@ namespace JJMedia5.Media.Helpers {
             // Season 1, Season 2... S1, S2..
             var sentanceSplit = output.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             if (sentanceSplit.Length > 1) {
-                var lastSentence = sentanceSplit.Last();
+                var lastSentence = sentanceSplit.Last().Replace(")", "");
 
                 // S1, S2..
                 if (lastSentence.StartsWith("s", StringComparison.OrdinalIgnoreCase) && lastSentence.Length > 1) {
@@ -86,7 +86,7 @@ namespace JJMedia5.Media.Helpers {
                     }
                 }
                 // Season 1, Season 2..
-                else if (sentanceSplit.Length > 2 && string.Equals("season", sentanceSplit.SkipLast(1).Last(), StringComparison.OrdinalIgnoreCase)) {
+                else if (sentanceSplit.Length > 2 && string.Equals("season", sentanceSplit.SkipLast(1).Last().Replace("(", ""), StringComparison.OrdinalIgnoreCase)) {
                     if (lastSentence.All(char.IsDigit) || lastSentence.All(IsRomanCharacter)) {
                         output = string.Join(' ', sentanceSplit.SkipLast(2));
                     }

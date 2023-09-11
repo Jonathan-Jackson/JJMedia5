@@ -1,10 +1,12 @@
 ﻿using JJMedia5.Core.Entities;
+using JJMedia5.Core.Interfaces;
 using JJMedia5.Core.Models;
+using System;
 using System.Threading.Tasks;
 
 namespace JJMedia5.Media.Services {
 
-    public class SeriesEpisodeSearchService {
+    public class SeriesEpisodeSearchService : ISeriesEpisodeSearchService {
         private readonly SeriesSearchService _seriesSearch;
         private readonly EpisodeSearchService _episodeSearch;
 
@@ -13,7 +15,11 @@ namespace JJMedia5.Media.Services {
             _episodeSearch = episodeSearch;
         }
 
-        public async Task<EpisodeSeriesInfo> FindAsync(string fileName) {
+        public async Task<EpisodeSeriesInfo> FindAsync(string fileName)
+        {
+            if (string.IsNullOrWhiteSpace(fileName))
+                throw new ArgumentNullException(nameof(fileName));
+
             // Find series.
             Series foundSeries = await _seriesSearch.FindAsync(fileName);
 

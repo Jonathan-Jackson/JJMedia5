@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30413.136
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33627.172
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JJMedia5.Media", "src\JJMedia5.Media\JJMedia5.Media.csproj", "{F088868A-B2EB-43C1-8CA5-3FA00BFFAD34}"
 EndProject
@@ -25,7 +25,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JJMedia5.Core.Database", "s
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "client", "client", "{BCC02932-2FE3-42A2-A141-F1549F39D312}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JJMedia5.Main", "JJMedia5.Main\JJMedia5.Main.csproj", "{99340F33-7387-4B45-AA59-2D5B69CF9230}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JJMedia5.Main", "JJMedia5.Main\JJMedia5.Main.csproj", "{99340F33-7387-4B45-AA59-2D5B69CF9230}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{2DA6B6FD-6BEE-49D8-A3EE-42748815D6D8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JJMedia5.Tests", "JJMedia5.Tests\JJMedia5.Tests.csproj", "{CC8C38F9-B9A5-46CD-BE0A-BACA25F48C8C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -63,6 +67,10 @@ Global
 		{99340F33-7387-4B45-AA59-2D5B69CF9230}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{99340F33-7387-4B45-AA59-2D5B69CF9230}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{99340F33-7387-4B45-AA59-2D5B69CF9230}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CC8C38F9-B9A5-46CD-BE0A-BACA25F48C8C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC8C38F9-B9A5-46CD-BE0A-BACA25F48C8C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC8C38F9-B9A5-46CD-BE0A-BACA25F48C8C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC8C38F9-B9A5-46CD-BE0A-BACA25F48C8C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -78,6 +86,8 @@ Global
 		{9CD8419E-D37B-42E8-AB6B-164DBA1B7CA2} = {AEABE56A-BB8B-4499-999C-D0387260CDDF}
 		{BCC02932-2FE3-42A2-A141-F1549F39D312} = {F9E2B3AB-92AE-47D0-A66F-D92CFCB99DBB}
 		{99340F33-7387-4B45-AA59-2D5B69CF9230} = {FC39098C-6154-46BC-9C76-276929897821}
+		{2DA6B6FD-6BEE-49D8-A3EE-42748815D6D8} = {F9E2B3AB-92AE-47D0-A66F-D92CFCB99DBB}
+		{CC8C38F9-B9A5-46CD-BE0A-BACA25F48C8C} = {2DA6B6FD-6BEE-49D8-A3EE-42748815D6D8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A530E2F0-53D6-4BF6-853F-C1A77FF635DE}
