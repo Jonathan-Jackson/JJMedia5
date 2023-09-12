@@ -14,9 +14,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\JJMedia5.Core\JJMedia5.Core.csproj" />
-    <ProjectReference Include="..\src\JJMedia5.FileManager\JJMedia5.FileManager.csproj" />
-    <ProjectReference Include="..\src\JJMedia5.Media\JJMedia5.Media.csproj" />
+    <ProjectReference Include="..\JJMedia5.Core\JJMedia5.Core.csproj" />
+    <ProjectReference Include="..\JJMedia5.FileManager\JJMedia5.FileManager.csproj" />
+    <ProjectReference Include="..\JJMedia5.Media\JJMedia5.Media.csproj" />
   </ItemGroup>
 
   <ItemGroup>
