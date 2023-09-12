@@ -35,7 +35,9 @@ namespace JJMedia5.Media.Services {
         public async Task<Series> FindByValueAsync(string value) {
             Series result = await FindInDatabaseAsync(value);
 
-            if (result != null)
+            // A little nuance, but if this aired a while ago - check @ the API
+            // to see if a new show has been added (since we last looked).
+            if (result != null && result.AddedOn < DateTime.UtcNow.AddMonths(-2) && result.AirDate > DateTime.UtcNow.AddYears(-2))
                 return result;
 
             result = await FindInAPIAsync(value);
