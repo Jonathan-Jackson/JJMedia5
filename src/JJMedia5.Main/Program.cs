@@ -28,8 +28,12 @@ namespace JJMedia5.Main {
 
             _logger.LogInformation("Application Startup Complete.");
             await Task.WhenAll(
-               fileManager.PollFeeds(),
-               fileManager.PollCompleteFiles(),
+               // Disabled the below for now, as we are using qBittorrent's native
+               // RSS auto-downloader + moving completed files into seperate folders.
+               // We're also keeping a FULL history of downloaded files in there, so we
+               // don't need a history..
+               //fileManager.PollFeeds(), 
+               //fileManager.PollCompleteFiles(),
                fileManager.PollPendingFiles()
              );
         }
