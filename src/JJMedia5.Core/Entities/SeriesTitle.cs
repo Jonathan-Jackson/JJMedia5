@@ -3,7 +3,7 @@
 namespace JJMedia5.Core.Entities {
 
     [Repository(TableName = "SeriesTitles")]
-    public class SeriesTitle {
+    public class SeriesTitle : Entity {
 
         public SeriesTitle() {
         }
@@ -13,12 +13,17 @@ namespace JJMedia5.Core.Entities {
             IsPrimary = isPrimary;
         }
 
-        public int Id { get; set; }
-
         public int SeriesId { get; set; }
 
         public string Title { get; set; }
 
         public bool IsPrimary { get; set; }
+
+        public override object GetPropertyModel()
+            => new {
+                SeriesId,
+                Title,
+                IsPrimary
+            };
     }
 }

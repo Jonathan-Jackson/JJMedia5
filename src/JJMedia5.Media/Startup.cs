@@ -1,5 +1,6 @@
 using FluentValidation.AspNetCore;
 using JJMedia5.Core.Database;
+using JJMedia5.Core.Database.DbLite;
 using JJMedia5.Core.Entities;
 using JJMedia5.Core.Interfaces;
 using JJMedia5.Media.Services;
@@ -31,11 +32,11 @@ namespace JJMedia5 {
 
             services
                 .AddSingleton(new JJMediaDbManager(Configuration.GetConnectionString("JJMediaDb")))
-                .AddSingleton<IRepository<RssFeed>, EntityRepository<RssFeed>>()
+                .AddSingleton<IRepository<RssFeed>, DbLiteRepository<RssFeed>>()
                 .AddSingleton(new TMDbClient(Configuration.GetValue<string>("TmdbKey")))
                 .AddSingleton<ISeriesEpisodeSearchService, SeriesEpisodeSearchService>()
-                .AddSingleton<SeriesRepository>()
-                .AddSingleton<EpisodeRepository>()
+                .AddSingleton<DbLiteSeriesRepository>()
+                .AddSingleton<DbLiteEpisodeRepository>()
                 .AddTransient<SeriesSearchService>()
                 .AddTransient<EpisodeSearchService>();
         }

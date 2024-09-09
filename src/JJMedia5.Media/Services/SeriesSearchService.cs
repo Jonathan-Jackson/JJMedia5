@@ -13,9 +13,9 @@ namespace JJMedia5.Media.Services {
 
     public class SeriesSearchService {
         private readonly TMDbClient _apiClient;
-        private readonly SeriesRepository _repo;
+        private readonly ISeriesRepository _repo;
 
-        public SeriesSearchService(TMDbClient tvDbClient, SeriesRepository repo) {
+        public SeriesSearchService(TMDbClient tvDbClient, ISeriesRepository repo) {
             _apiClient = tvDbClient;
             _repo = repo;
         }

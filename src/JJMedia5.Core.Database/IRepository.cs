@@ -18,17 +18,17 @@ namespace JJMedia5.Core.Database {
 
         Task<int> UpdateAsync(TEntity item);
 
-        Task<ICollection<TEntity>> WhereAsync(Expression<Func<TEntity, object>> expression, object value, int limit = 10);
+        Task<ICollection<TEntity>> WhereAsync(Expression<Func<TEntity, bool>> expression, int limit = 10);
 
         // Is there a better way to do this with expressions? Just take the lazy route for now since the outcome is the same,
         // and with generics we only have to write this once - more complex queries will need overrides anyway.
-        Task<ICollection<TEntity>> WhereGreaterThanAsync(Expression<Func<TEntity, object>> expression, object value, int limit = 10);
+        Task<ICollection<TEntity>> WhereGreaterThanAsync(Expression<Func<TEntity, bool>> expression, int limit = 10);
 
-        Task<ICollection<TEntity>> WhereInAsync(Expression<Func<TEntity, object>> expression, IEnumerable<object> values, int limit = 100);
+        Task<ICollection<TEntity>> WhereInAsync(Expression<Func<TEntity, bool>> expression, int limit = 100);
 
-        Task<ICollection<TEntity>> WhereLessThanAsync(Expression<Func<TEntity, object>> expression, object value, int limit = 10);
+        Task<ICollection<TEntity>> WhereLessThanAsync(Expression<Func<TEntity, bool>> expression, int limit = 10);
 
-        Task<ICollection<TEntity>> WhereNotAsync(Expression<Func<TEntity, object>> expression, object value, int limit = 10);
+        Task<ICollection<TEntity>> WhereNotAsync(Expression<Func<TEntity, bool>> expression, int limit = 10);
 
         //--
     }

@@ -1,4 +1,5 @@
 ﻿using JJMedia5.Core.Database;
+using JJMedia5.Core.Database.DbLite;
 using JJMedia5.Core.Entities;
 using JJMedia5.Core.Interfaces;
 using JJMedia5.Media.Services;
@@ -18,11 +19,11 @@ namespace JJMedia5.Tests.Helpers {
             var config = GetConfiguration();
 
             services
-                .AddSingleton<IRepository<RssFeed>, EntityRepository<RssFeed>>()
+                .AddSingleton<IRepository<RssFeed>, DbLiteRepository<RssFeed>>()
                 .AddSingleton(new TMDbClient(config.GetValue<string>("TmdbKey")))
                 .AddSingleton<ISeriesEpisodeSearchService, SeriesEpisodeSearchService>()
-                .AddSingleton<SeriesRepository>()
-                .AddSingleton<EpisodeRepository>()
+                .AddSingleton<DbLiteSeriesRepository>()
+                .AddSingleton<DbLiteEpisodeRepository>()
                 .AddTransient<SeriesSearchService>()
                 .AddTransient<EpisodeSearchService>()
                 .AddSingleton<HttpClient>()

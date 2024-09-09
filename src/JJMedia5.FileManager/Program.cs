@@ -1,10 +1,12 @@
 ﻿using JJMedia5.Core.Database;
+using JJMedia5.Core.Database.DbLite;
 using JJMedia5.Core.Entities;
 using JJMedia5.Core.Interfaces;
 using JJMedia5.Core.Models;
 using JJMedia5.FileManager.Clients;
 using JJMedia5.FileManager.Options;
 using JJMedia5.FileManager.Services;
+using LiteDB;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -46,10 +48,10 @@ namespace JJMedia5.FileManager {
             services.AddSingleton<HttpClient>()
                 .AddSingleton(config.GetSection("TorrentClientOptions").Get<BasicAuthEndPoint>())
                 .AddSingleton(config.GetSection("StorageOptions").Get<StorageOptions>())
-                .AddSingleton(new JJMediaDbManager(config.GetConnectionString("JJMediaDb")));
+                .AddSingleton<ILiteDatabase>(new LiteDatabase(@"JJMedia5.db"));
             // Local Dependencies.
-            services.AddSingleton<IRepository<RssFeed>, EntityRepository<RssFeed>>()
-                .AddSingleton<IRepository<RssDownload>, EntityRepository<RssDownload>>()
+            services.AddSingleton<IRepository<RssFeed>, DbLiteRepository<RssFeed>>()
+                .AddSingleton<IRepository<RssDownload>, DbLiteRepository<RssDownload>>()
                 .AddSingleton<RssService>()
                 .AddSingleton<ITorrentClient, QBitClient>()
                 .AddSingleton<TorrentService>()

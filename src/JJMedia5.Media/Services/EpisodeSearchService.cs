@@ -12,10 +12,10 @@ namespace JJMedia5.Media.Services
 {
 
     public class EpisodeSearchService {
-        private readonly EpisodeRepository _repo;
+        private readonly IEpisodeRepository _repo;
         private readonly TMDbClient _apiClient;
 
-        public EpisodeSearchService(TMDbClient tvDbClient, EpisodeRepository repo) {
+        public EpisodeSearchService(TMDbClient tvDbClient, IEpisodeRepository repo) {
             _apiClient = tvDbClient;
             _repo = repo;
         }

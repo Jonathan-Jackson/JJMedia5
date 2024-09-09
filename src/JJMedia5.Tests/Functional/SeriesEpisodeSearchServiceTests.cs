@@ -1,4 +1,4 @@
-using JJMedia5.Core.Interfaces;
+using JJMedia5.Media.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace JJMedia5.Tests.Functional {
@@ -11,7 +11,7 @@ namespace JJMedia5.Tests.Functional {
         [DataRow("[SubsPlease] Cue! - 24 (1080p) [FDD6DFBA].mkv")]
         public async Task EpisodeNamesTest(string fileName)
         {
-            var service = _provider.GetRequiredService<ISeriesEpisodeSearchService>();
+            var service = _provider.GetRequiredService<SeriesEpisodeSearchService>();
             var result = await service.FindAsync(fileName);
 
             Assert.IsNotNull(result);

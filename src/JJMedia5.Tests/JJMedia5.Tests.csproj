@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\JJMedia5.Main\JJMedia5.Main.csproj" />
+    <ProjectReference Include="..\JJMedia5.Media\JJMedia5.Media.csproj" />
   </ItemGroup>
 
   <ItemGroup>

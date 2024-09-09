@@ -31,7 +31,7 @@ namespace JJMedia5.FileManager.Services {
         }
 
         public async Task<IReadOnlyCollection<RssDownload>> GetNewHashesFromFeeds() {
-            var feeds = await _rssFeedRepo.WhereLessThanAsync(r => r.StartDate, DateTimeOffset.UtcNow, 1000);
+            var feeds = await _rssFeedRepo.WhereLessThanAsync(r => r.StartDate < DateTimeOffset.UtcNow, 1000);
 
             // yes wait on each one, we don't want to ddos the endpoints.
             var downloads = new List<RssDownload>();
@@ -46,7 +46,8 @@ namespace JJMedia5.FileManager.Services {
             }
 
             // remove any already downloaded.
-            var dups = await _rssDownloadRepo.WhereInAsync(r => r.Hash, downloads.Select(d => d.Hash), limit: downloads.Count);
+            var dlHashes = downloads.Select(d => d.Hash).ToArray();
+            var dups = await _rssDownloadRepo.WhereInAsync(r => dlHashes.Contains(r.Hash), limit: downloads.Count);
             var dupHashes = dups.Select(d => d.Hash).ToHashSet();
             return downloads.Where(d => !dupHashes.Contains(d.Hash)).ToArray();
         }

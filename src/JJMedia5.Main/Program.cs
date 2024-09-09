@@ -1,19 +1,22 @@
 ﻿using JJMedia5.Core.Database;
+using JJMedia5.Core.Database.DbLite;
 using JJMedia5.Core.Entities;
 using JJMedia5.Core.Interfaces;
 using JJMedia5.Core.Models;
+using JJMedia5.FileManager;
 using JJMedia5.FileManager.Clients;
 using JJMedia5.FileManager.Options;
 using JJMedia5.FileManager.Services;
+using JJMedia5.Media.Services;
+using LiteDB;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
-using JJMedia5.FileManager;
-using JJMedia5.Media.Services;
 using TMDbLib.Client;
+using static Dapper.SqlMapper;
 
 namespace JJMedia5.Main {
     static class Program {
@@ -45,6 +48,10 @@ namespace JJMedia5.Main {
 
             IServiceCollection services = new ServiceCollection();
 
+            // setup our DB.
+            services
+                .AddSingleton(new LiteDatabase(@"JJMedia5.db"));
+
             SetupFileManagerDependencies(config, services);
             SetupMediaDependencies(config, services);
 
@@ -58,8 +65,11 @@ namespace JJMedia5.Main {
                 .AddSingleton(config.GetSection("StorageOptions").Get<StorageOptions>())
                 .AddSingleton(new JJMediaDbManager(config.GetConnectionString("JJMediaDb")));
             // Local Dependencies.
-            services.AddSingleton<IRepository<RssFeed>, EntityRepository<RssFeed>>()
-                .AddSingleton<IRepository<RssDownload>, EntityRepository<RssDownload>>()
+            services
+                .AddSingleton(s => s.GetRequiredService<LiteDatabase>().GetCollection<RssFeed>(nameof(RssFeed)))
+                .AddSingleton(s => s.GetRequiredService<LiteDatabase>().GetCollection<RssDownload>(nameof(RssDownload)))
+                .AddSingleton<IRepository<RssFeed>, DbLiteRepository<RssFeed>>()
+                .AddSingleton<IRepository<RssDownload>, DbLiteRepository<RssDownload>>()
                 .AddSingleton<RssService>()
                 .AddSingleton<ITorrentClient, QBitClient>()
                 .AddSingleton<TorrentService>()
@@ -71,11 +81,15 @@ namespace JJMedia5.Main {
         private static void SetupMediaDependencies(IConfiguration config, IServiceCollection services) {
             // Local Dependencies.
             services
-                .AddSingleton<IRepository<RssFeed>, EntityRepository<RssFeed>>()
+                .AddSingleton<IRepository<RssFeed>, DbLiteRepository<RssFeed>>()
                 .AddSingleton(new TMDbClient(config.GetValue<string>("TmdbKey")))
+                .AddSingleton(s => s.GetRequiredService<LiteDatabase>().GetCollection<Series>(nameof(Series)))
+                .AddSingleton(s => s.GetRequiredService<LiteDatabase>().GetCollection<Episode>(nameof(Episode)))
+                .AddSingleton(s => s.GetRequiredService<LiteDatabase>().GetCollection<SeriesTitle>(nameof(SeriesTitle)))
                 .AddSingleton<ISeriesEpisodeSearchService, SeriesEpisodeSearchService>()
-                .AddSingleton<SeriesRepository>()
-                .AddSingleton<EpisodeRepository>()
+                .AddSingleton<ISeriesRepository, DbLiteSeriesRepository>()
+                .AddSingleton<IEpisodeRepository, DbLiteEpisodeRepository>()
+                .AddSingleton<DbLiteRepository<SeriesTitle>>()
                 .AddTransient<SeriesSearchService>()
                 .AddTransient<EpisodeSearchService>();
         }
